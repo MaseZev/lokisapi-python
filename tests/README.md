@@ -1,80 +1,108 @@
-# Tests for LokisApi Python Library
+# Тесты для LokisApi Python Library
 
-This directory contains tests for the LokisApi Python library.
+Этот каталог содержит тесты для библиотеки LokisApi Python.
 
-## Running Tests
+## Запуск тестов
 
-### Install test dependencies
+### Установка зависимостей для тестирования
 
 ```bash
 pip install -e ".[test]"
 ```
 
-### Run all tests
+### Запуск всех тестов
 
 ```bash
 pytest
 ```
 
-### Run tests with coverage
+### Запуск тестов с покрытием
 
 ```bash
 pytest --cov=lokisapi
 ```
 
-### Run specific test files
+### Запуск конкретных тестовых файлов
 
 ```bash
 pytest tests/test_client.py
 pytest tests/test_utils.py
+pytest tests/test_model_cache.py
+pytest tests/test_exceptions.py
 ```
 
-### Run tests with verbose output
+### Запуск тестов с подробным выводом
 
 ```bash
 pytest -v
 ```
 
-## Test Structure
+## Структура тестов
 
-- `test_client.py` - Tests for the main LokisApiClient class
-- `test_utils.py` - Tests for utility functions
-- `__init__.py` - Test package initialization
+- `test_client.py` - Тесты для основного класса LokisApiClient
+- `test_utils.py` - Тесты для утилитарных функций
+- `test_model_cache.py` - Тесты для системы кэширования моделей
+- `test_exceptions.py` - Тесты для обработки исключений
+- `__init__.py` - Инициализация тестового пакета
 
-## Test Coverage
+## Покрытие тестами
 
-The tests cover:
+Тесты покрывают:
 
-- Client initialization and configuration
-- Image generation and editing
-- Chat completions with various parameters
-- Thinking mode for Gemini 2.5 models
-- Reasoning effort for GPT-5 models
-- Model listing and information
-- Error handling (authentication, rate limits, API errors)
-- Utility functions for image processing
-- Utility functions for model information
-- Input validation
+- Инициализацию и конфигурацию клиента
+- Генерацию и редактирование изображений
+- Чат-комплетации с различными параметрами
+- Thinking режим для моделей Gemini 2.5
+- Reasoning Effort для моделей GPT-5
+- Получение списка моделей и информации о них
+- Автоматическое кэширование моделей
+- Управление кэшем моделей
+- Обработку ошибок (аутентификация, лимиты, ошибки API)
+- Все новые типы исключений
+- Утилитарные функции для обработки изображений
+- Утилитарные функции для работы с моделями
+- Валидацию входных данных
+- Сетевые ошибки и таймауты
 
-## Mocking
+## Мокирование
 
-Tests use `unittest.mock` to mock HTTP requests and avoid making actual API calls during testing. This ensures:
+Тесты используют `unittest.mock` для мокирования HTTP запросов и избежания реальных API вызовов во время тестирования. Это обеспечивает:
 
-- Tests run quickly
-- Tests don't depend on external services
-- Tests are reliable and repeatable
-- No API keys are required for testing
+- Быстрое выполнение тестов
+- Независимость от внешних сервисов
+- Надежность и повторяемость тестов
+- Отсутствие необходимости в API ключах для тестирования
 
-## Adding New Tests
+## Добавление новых тестов
 
-When adding new features to the library:
+При добавлении новых функций в библиотеку:
 
-1. Add corresponding tests in the appropriate test file
-2. Test both success and error cases
-3. Use mocking for external dependencies
-4. Include docstrings explaining what each test does
-5. Follow the existing naming conventions (`test_*`)
+1. Добавьте соответствующие тесты в подходящий тестовый файл
+2. Тестируйте как успешные, так и ошибочные случаи
+3. Используйте мокирование для внешних зависимостей
+4. Включайте docstrings с объяснением назначения каждого теста
+5. Следуйте существующим соглашениям по именованию (`test_*`)
 
-## Continuous Integration
+## Непрерывная интеграция
 
-These tests are designed to run in CI/CD pipelines and should pass without requiring external API access or credentials.
+Эти тесты предназначены для запуска в CI/CD пайплайнах и должны проходить без необходимости доступа к внешним API или учетным данным.
+
+## Особенности тестирования
+
+### Тестирование кэширования моделей
+- Проверка автоматического получения моделей из API
+- Тестирование кэширования и инвалидации
+- Проверка сохранения кэша на диск
+- Тестирование резервного использования кэша
+
+### Тестирование обработки ошибок
+- Проверка всех новых типов исключений
+- Тестирование парсинга ошибок API
+- Проверка извлечения метаданных ошибок
+- Тестирование retry-after логики
+
+### Тестирование сетевых ошибок
+- Мокирование таймаутов
+- Тестирование ошибок соединения
+- Проверка повторных попыток
+- Тестирование недоступности сервиса

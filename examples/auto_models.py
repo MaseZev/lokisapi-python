@@ -2,7 +2,7 @@
 Example of automatic model discovery and caching.
 """
 
-from .lokisapi import LokisApiClient, ChatMessage, ChatRole
+from lokisapi import LokisApiClient, ChatMessage, ChatRole
 
 
 def main():

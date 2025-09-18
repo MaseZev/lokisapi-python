@@ -1,65 +1,80 @@
 # Changelog
 
-## [1.0.0] - 2024-01-XX
+Все значимые изменения в этом проекте будут документированы в этом файле.
+
+Формат основан на [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+и этот проект придерживается [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.0.0] - 2025-01-XX
 
 ### Added
-- **Automatic Model Discovery**: Models are now automatically fetched from API and cached
-- **Enhanced Error Handling**: Detailed error types for different scenarios
-- **Model Caching**: Intelligent caching system with configurable duration
-- **Advanced Rate Limiting**: Specific error types for different limit scenarios
-- **Image Editing Support**: Full support for DALL-E image editing
-- **Thinking Mode**: Support for Gemini 2.5 Thinking feature
-- **Reasoning Effort**: Support for GPT-5 Reasoning Effort levels
-- **Model Categories**: Automatic categorization of models (text, image, deprecated)
-- **Cache Management**: Methods to refresh, clear, and inspect model cache
+- **Первый релиз** библиотеки LokisApi Python
+- **Чат-комплетации** с поддержкой GPT и Gemini моделей
+- **Генерация изображений** с помощью DALL-E моделей
+- **Редактирование изображений** с поддержкой DALL-E моделей
+- **Thinking режим** для Gemini 2.5 моделей с настройкой thinking_budget
+- **Reasoning Effort** для GPT-5 моделей с уровнями LOW, MEDIUM, HIGH
+- **Стриминг ответов** для чат-комплетаций в реальном времени
+- **Автоматическое получение моделей** из API с кэшированием
+- **Умное управление моделями** - фильтрация по категориям и возможностям
+- **Кэширование моделей** с настраиваемой длительностью и сохранением на диск
+- **Расширенная обработка ошибок** с детальными исключениями
+- **Утилиты для работы с изображениями** - кодирование, декодирование, изменение размера
+- **Утилиты для работы с моделями** - форматирование информации, оценка токенов
+- **Полная совместимость** с LokisApi endpoints
+- **Поддержка всех моделей** без необходимости обновления библиотеки
+- **Подробная документация** и примеры использования
 
 ### Enhanced
-- **Error Messages**: More descriptive error messages with context
-- **Model Information**: Automatic detection of model capabilities
-- **Network Handling**: Better timeout and connection error handling
-- **API Compatibility**: Full compatibility with LokisApi endpoints
+- **Сообщения об ошибках**: Более описательные сообщения с контекстом
+- **Информация о моделях**: Автоматическое определение возможностей моделей
+- **Сетевая обработка**: Улучшенная обработка таймаутов и ошибок соединения
+- **Совместимость с API**: Полная совместимость с LokisApi endpoints
 
-### New Exception Types
-- `ModelNotFoundError`: When requested model doesn't exist
-- `ModelNotSupportedError`: When model doesn't support requested feature
-- `QuotaExceededError`: When quota limits are exceeded
-- `TokenLimitError`: When token limits are exceeded
-- `RequestLimitError`: When request limits are exceeded
-- `ServiceUnavailableError`: When service is temporarily down
-- `ImageProcessingError`: When image processing fails
+### Новые типы исключений
+- `AuthenticationError`: Ошибка аутентификации (неверный API ключ)
+- `ModelNotFoundError`: Запрашиваемая модель не найдена
+- `ModelNotSupportedError`: Модель не поддерживает запрашиваемую функцию
+- `QuotaExceededError`: Превышены квоты
+- `TokenLimitError`: Превышены лимиты токенов
+- `RequestLimitError`: Превышены лимиты запросов
+- `ServiceUnavailableError`: Сервис временно недоступен
+- `ImageProcessingError`: Ошибка обработки изображения
+- `ValidationError`: Ошибка валидации входных данных
+- `NetworkError`: Сетевая ошибка
 
-### New Client Methods
-- `get_thinking_models()`: Get models that support thinking
-- `get_image_models()`: Get models that support image generation/editing
-- `get_text_models()`: Get models that support text generation
-- `get_models_by_category()`: Get models filtered by category
-- `refresh_models_cache()`: Force refresh model cache
-- `clear_models_cache()`: Clear model cache
-- `get_models_cache_info()`: Get cache information
+### Новые методы клиента
+- `get_thinking_models()`: Получить модели с поддержкой thinking
+- `get_image_models()`: Получить модели для генерации/редактирования изображений
+- `get_text_models()`: Получить модели для текстовых задач
+- `get_models_by_category()`: Получить модели по категориям
+- `refresh_models_cache()`: Принудительно обновить кэш моделей
+- `clear_models_cache()`: Очистить кэш моделей
+- `get_models_cache_info()`: Получить информацию о кэше
 
-### Model Management
-- Automatic model discovery from API
-- Intelligent caching with file persistence
-- Fallback to cached models when API is unavailable
-- Configurable cache duration (default: 1 hour)
-- Automatic model capability detection
+### Управление моделями
+- Автоматическое получение моделей из API
+- Интеллектуальное кэширование с сохранением на диск
+- Резервное использование кэшированных моделей при недоступности API
+- Настраиваемая длительность кэша (по умолчанию: 1 час)
+- Автоматическое определение возможностей моделей
 
-### Error Handling Improvements
-- Detailed error context and metadata
-- Automatic retry-after header parsing
-- Limit type detection (RPM, TPM, RPD, etc.)
-- Network timeout handling
-- Connection error handling
-- Service availability detection
+### Улучшения обработки ошибок
+- Детальный контекст ошибок и метаданные
+- Автоматический парсинг заголовка retry-after
+- Определение типа лимита (RPM, TPM, RPD и т.д.)
+- Обработка сетевых таймаутов
+- Обработка ошибок соединения
+- Определение доступности сервиса
 
-### Backward Compatibility
-- All existing methods remain unchanged
-- Default behavior preserved
-- Optional parameters for new features
-- Graceful fallback to static model config
+### Обратная совместимость
+- Все существующие методы остаются без изменений
+- Сохранено поведение по умолчанию
+- Опциональные параметры для новых функций
+- Плавный переход к статической конфигурации моделей
 
-### Performance
-- Reduced API calls through intelligent caching
-- Faster model lookups
-- Persistent cache across sessions
-- Automatic cache invalidation
+### Производительность
+- Сокращение API вызовов через интеллектуальное кэширование
+- Более быстрый поиск моделей
+- Постоянный кэш между сессиями
+- Автоматическая инвалидация кэша
