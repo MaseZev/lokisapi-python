@@ -7,7 +7,7 @@ from lokisapi import LokisApiClient, ChatMessage, ChatRole
 
 def main():
     # Initialize client with automatic model discovery
-    client = LokisApiClient("sk-cdfa39cefe2df7a0e3d6e6dbf85a31a862b8bd95c8d7975e14cfc353a2d83755")
+    client = LokisApiClient("YOUR_API_KEY")
     
     print("=== Automatic Model Discovery Example ===\n")
     
