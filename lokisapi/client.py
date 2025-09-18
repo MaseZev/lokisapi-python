@@ -4,7 +4,7 @@ Main client for LokisApi interactions.
 
 import json
 import requests
-from typing import List, Iterator, Optional, Dict, Any
+from typing import List, Iterator, Optional, Dict, Any, Union
 from urllib.parse import urljoin
 
 from .models import (
