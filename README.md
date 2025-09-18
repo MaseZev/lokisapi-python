@@ -590,7 +590,6 @@ mypy lokisapi/
 
 ## 📞 Поддержка
 
-- **Документация**: [https://docs.lokisapi.online](https://docs.lokisapi.online)
 - **Issues**: [GitHub Issues](https://github.com/masezev/lokisapi-python/issues)
 - **Email**: support@lokisapi.online
 
@@ -641,3 +640,4 @@ mypy lokisapi/
 ---
 
 **Сделано с ❤️ командой LokisApi**
+
