@@ -115,8 +115,9 @@ class QuotaExceededError(RateLimitError):
     """Raised when quota is exceeded."""
     
     def __init__(self, message: str = "Quota exceeded", quota_type: Optional[str] = None,
-                 error_code: str = "QUOTA_EXCEEDED", details: Optional[Dict[str, Any]] = None):
-        super().__init__(message, error_code, details)
+                 retry_after: Optional[int] = None, error_code: str = "QUOTA_EXCEEDED",
+                 details: Optional[Dict[str, Any]] = None):
+        super().__init__(message, error_code, retry_after=retry_after, limit_type=quota_type, details=details)
         self.quota_type = quota_type  # 'daily', 'monthly', 'per_key', etc.
 
 
@@ -124,8 +125,9 @@ class TokenLimitError(RateLimitError):
     """Raised when token limit is exceeded."""
     
     def __init__(self, message: str = "Token limit exceeded", limit_type: Optional[str] = None,
-                 error_code: str = "TOKEN_LIMIT", details: Optional[Dict[str, Any]] = None):
-        super().__init__(message, error_code, details)
+                 retry_after: Optional[int] = None, error_code: str = "TOKEN_LIMIT",
+                 details: Optional[Dict[str, Any]] = None):
+        super().__init__(message, error_code, retry_after=retry_after, limit_type=limit_type, details=details)
         self.limit_type = limit_type  # 'per_minute', 'per_day', 'per_request', etc.
 
 
@@ -133,8 +135,9 @@ class RequestLimitError(RateLimitError):
     """Raised when request limit is exceeded."""
     
     def __init__(self, message: str = "Request limit exceeded", limit_type: Optional[str] = None,
-                 error_code: str = "REQUEST_LIMIT", details: Optional[Dict[str, Any]] = None):
-        super().__init__(message, error_code, details)
+                 retry_after: Optional[int] = None, error_code: str = "REQUEST_LIMIT",
+                 details: Optional[Dict[str, Any]] = None):
+        super().__init__(message, error_code, retry_after=retry_after, limit_type=limit_type, details=details)
         self.limit_type = limit_type  # 'per_minute', 'per_day', 'per_hour', etc.
 
 
@@ -144,7 +147,7 @@ class ServiceUnavailableError(APIError):
     def __init__(self, message: str = "Service temporarily unavailable", 
                  retry_after: Optional[int] = None, error_code: str = "SERVICE_UNAVAILABLE",
                  details: Optional[Dict[str, Any]] = None):
-        super().__init__(message, 503, error_code, details)
+        super().__init__(message, 503, error_code, response_data=None, details=details)
         self.retry_after = retry_after
 
 
