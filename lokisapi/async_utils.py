@@ -2,8 +2,15 @@ import base64
 import io
 import aiofiles
 import asyncio
-from typing import Union, Optional
+from typing import Union, Optional, TYPE_CHECKING
 from PIL import Image
+if TYPE_CHECKING:
+    from .async_client import AsyncLokisApiClient
+
+try:
+    _RESAMPLE = Image.Resampling.LANCZOS
+except Exception:
+    _RESAMPLE = Image.LANCZOS
 
 
 async def encode_image_to_base64(image_path: str) -> str:
@@ -17,8 +24,13 @@ async def encode_image_from_bytes(image_bytes: bytes) -> str:
 
 
 async def decode_base64_to_image(base64_string: str) -> Image.Image:
+    if ',' in base64_string:
+        base64_string = base64_string.split(',', 1)[1]
     image_data = base64.b64decode(base64_string)
-    return Image.open(io.BytesIO(image_data))
+    image = Image.open(io.BytesIO(image_data))
+    if image.mode not in ("RGB", "RGBA"):
+        image = image.convert("RGBA")
+    return image
 
 
 async def save_base64_image(base64_string: str, output_path: str):
@@ -29,11 +41,15 @@ async def save_base64_image(base64_string: str, output_path: str):
 async def resize_image_for_api(image_path: str, target_size: tuple) -> str:
     async with aiofiles.open(image_path, "rb") as f:
         image_bytes = await f.read()
-    
     with Image.open(io.BytesIO(image_bytes)) as img:
-        img_resized = img.resize(target_size, Image.Resampling.LANCZOS)
+        
+        if img.mode != 'RGB':
+            img = img.convert('RGB')
+        if img.size[0] > target_size[0] or img.size[1] > target_size[1]:
+            img.thumbnail(target_size, _RESAMPLE)
         buffer = io.BytesIO()
-        img_resized.save(buffer, format='PNG')
+        img.save(buffer, format='PNG')
+        buffer.seek(0)
         return await encode_image_from_bytes(buffer.getvalue())
 
 
@@ -53,7 +69,8 @@ def validate_image_size(size: Union[str, tuple]) -> bool:
 
 
 def estimate_tokens(text: str) -> int:
-    return len(text.split()) * 1.3
+
+    return max(1, len(text) // 4 + 1)
 
 
 def validate_api_key_format(api_key: str) -> bool:

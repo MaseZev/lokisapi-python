@@ -1,0 +1,12 @@
+l.md
+.venv/
+.pytest_cache/
+lokisapi.egg-info/
+__pycache__/
+*.pyc
+.DS_Store
+*.pyo
+*.egg-info/
+dist/
+build/
+

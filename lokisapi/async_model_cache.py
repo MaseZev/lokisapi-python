@@ -1,6 +1,7 @@
 import time
 import json
 import os
+import asyncio
 import aiofiles
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
@@ -120,7 +121,7 @@ class AsyncModelManager:
         return [m.id for m in models if m.supports_images]
     
     async def get_text_models(self, force_refresh: bool = False) -> List[str]:
-        models = await self.get_models(force_ref)
+        models = await self.get_models(force_refresh)
         return [m.id for m in models if m.supports_text]
     
     async def get_models_by_category(self, category: str, force_refresh: bool = False) -> List[Model]:
