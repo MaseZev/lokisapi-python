@@ -15,7 +15,7 @@ def sync_example():
     print("=== Синхронный клиент ===")
     start_time = time.time()
     
-    client = LokisApiClient("sk-cdfa39cefe2df7a0e3d6e6dbf85a31a862b8bd95c8d7975e14cfc353a2d83755")
+    client = LokisApiClient("YOUR_TOKEN")
     
     # Получение моделей
     models = client.list_models()
@@ -39,7 +39,7 @@ async def async_example():
     print("=== Асинхронный клиент ===")
     start_time = time.time()
     
-    async with AsyncLokisApiClient("sk-cdfa39cefe2df7a0e3d6e6dbf85a31a862b8bd95c8d7975e14cfc353a2d83755") as client:
+    async with AsyncLokisApiClient("YOUR_TOKEN") as client:
         # Получение моделей
         models = await client.list_models()
         print(f"Модели: {len(models)} найдено")
@@ -62,7 +62,7 @@ async def concurrent_async_example():
     print("=== Асинхронный клиент (конкурентно) ===")
     start_time = time.time()
     
-    async with AsyncLokisApiClient("sk-cdfa39cefe2df7a0e3d6e6dbf85a31a862b8bd95c8d7975e14cfc353a2d83755") as client:
+    async with AsyncLokisApiClient("YOUR_TOKEN") as client:
         # Выполняем все операции одновременно
         models_task = client.list_models()
         
@@ -89,7 +89,7 @@ def sync_concurrent_example():
     print("=== Синхронный клиент (последовательно) ===")
     start_time = time.time()
     
-    client = LokisApiClient("sk-cdfa39cefe2df7a0e3d6e6dbf85a31a862b8bd95c8d7975e14cfc353a2d83755")
+    client = LokisApiClient("YOUR_TOKEN")
     
     # Выполняем операции последовательно
     models = client.list_models()
@@ -114,7 +114,7 @@ async def streaming_comparison():
     print("Синхронный стриминг:")
     start_time = time.time()
     
-    client = LokisApiClient("sk-cdfa39cefe2df7a0e3d6e6dbf85a31a862b8bd95c8d7975e14cfc353a2d83755")
+    client = LokisApiClient("YOUR_TOKEN")
     messages = [ChatMessage(ChatRole.USER, "Расскажи короткую историю")]
     
     print("Ответ: ", end="")
@@ -130,7 +130,7 @@ async def streaming_comparison():
     print("Асинхронный стриминг:")
     start_time = time.time()
     
-    async with AsyncLokisApiClient("sk-cdfa39cefe2df7a0e3d6e6dbf85a31a862b8bd95c8d7975e14cfc353a2d83755") as client:
+    async with AsyncLokisApiClient("YOUR_TOKEN") as client:
         messages = [ChatMessage(ChatRole.USER, "Расскажи короткую историю")]
         
         print("Ответ: ", end="")
@@ -170,3 +170,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
