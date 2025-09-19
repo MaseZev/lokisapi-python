@@ -8,7 +8,7 @@ from lokisapi import AsyncLokisApiClient, ChatMessage, ChatRole, ImageSize, Imag
 
 async def main():
     # Инициализация асинхронного клиента
-    async with AsyncLokisApiClient("sk-cdfa39cefe2df7a0e3d6e6dbf85a31a862b8bd95c8d7975e14cfc353a2d83755") as client:
+    async with AsyncLokisApiClient("YOUR_TOKEN") as client:
         print("=== Асинхронный клиент LokisApi ===\n")
         
         # Пример 1: Простой чат
@@ -112,7 +112,7 @@ async def concurrent_example():
     """Пример конкурентного выполнения запросов."""
     print("=== Конкурентное выполнение ===\n")
     
-    async with AsyncLokisApiClient("sk-cdfa39cefe2df7a0e3d6e6dbf85a31a862b8bd95c8d7975e14cfc353a2d83755") as client:
+    async with AsyncLokisApiClient("YOUR_TOKEN") as client:
         # Создаем несколько задач одновременно
         tasks = []
         
@@ -158,3 +158,4 @@ if __name__ == "__main__":
     
     # Запуск примера конкурентного выполнения
     asyncio.run(concurrent_example())
+
