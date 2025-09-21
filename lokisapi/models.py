@@ -159,6 +159,20 @@ class Model:
             owned_by=data["owned_by"]
         )
 
+    def to_dict(self) -> Dict[str, Any]:
+        """Serialize Model to dictionary (includes optional capability flags if present)."""
+        return {
+            "id": self.id,
+            "object": self.object,
+            "created": self.created,
+            "owned_by": self.owned_by,
+            # Optional fields possibly injected by managers
+            "supports_text": getattr(self, "supports_text", None),
+            "supports_thinking": getattr(self, "supports_thinking", None),
+            "supports_images": getattr(self, "supports_images", None),
+            "deprecated": getattr(self, "deprecated", None),
+        }
+
 
 @dataclass
 class ImageGenerationResponse:

@@ -4,8 +4,15 @@ Utility functions for LokisApi library.
 
 import base64
 import io
-from typing import Union, Optional
+from typing import Union, Optional, TYPE_CHECKING
 from PIL import Image
+if TYPE_CHECKING:
+    from .client import LokisApiClient
+
+try:
+    _RESAMPLE = Image.Resampling.LANCZOS
+except Exception:
+    _RESAMPLE = Image.LANCZOS
 
 
 def encode_image_to_base64(image_path: str) -> str:
@@ -58,7 +65,10 @@ def decode_base64_to_image(base64_string: str) -> Image.Image:
         base64_string = base64_string.split(',', 1)[1]
     
     image_data = base64.b64decode(base64_string)
-    return Image.open(io.BytesIO(image_data))
+    image = Image.open(io.BytesIO(image_data))
+    if image.mode != 'RGBA':
+        image = image.convert('RGBA')
+    return image
 
 
 def save_base64_image(base64_string: str, output_path: str) -> None:
@@ -72,8 +82,12 @@ def save_base64_image(base64_string: str, output_path: str) -> None:
     Example:
         >>> save_base64_image(base64_string, "output.png")
     """
-    image = decode_base64_to_image(base64_string)
-    image.save(output_path)
+   
+    if ',' in base64_string:
+        base64_string = base64_string.split(',', 1)[1]
+    image_data = base64.b64decode(base64_string)
+    with open(output_path, "wb") as f:
+        f.write(image_data)
 
 
 def resize_image_for_api(image_path: str, max_size: tuple = (1024, 1024)) -> str:
@@ -97,7 +111,7 @@ def resize_image_for_api(image_path: str, max_size: tuple = (1024, 1024)) -> str
         
         # Resize if too large
         if img.size[0] > max_size[0] or img.size[1] > max_size[1]:
-            img.thumbnail(max_size, Image.Resampling.LANCZOS)
+            img.thumbnail(max_size, _RESAMPLE)
         
         # Convert to bytes
         img_bytes = io.BytesIO()

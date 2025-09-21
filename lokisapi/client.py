@@ -45,7 +45,9 @@ class LokisApiClient:
         self.session = requests.Session()
         self.session.headers.update({
             'Authorization': f'Bearer {api_key}',
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'User-Agent': 'lokisapi-python/1.0.0'
         })
         
         # Initialize model manager for automatic model discovery
