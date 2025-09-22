@@ -1,9 +1,14 @@
 """
-Main client for LokisApi interactions.
+Synchronous client for LokisApi with simple retries and streaming support.
 """
 
 import json
 import requests
+from requests.adapters import HTTPAdapter
+try:
+    from urllib3.util.retry import Retry
+except Exception:  # pragma: no cover
+    Retry = None  # type: ignore
 from typing import List, Iterator, Optional, Dict, Any, Union
 from urllib.parse import urljoin
 
@@ -18,6 +23,7 @@ from .exceptions import (
     QuotaExceededError, TokenLimitError, RequestLimitError, ServiceUnavailableError
 )
 from .model_cache import ModelManager
+from .config import Settings
 
 
 class LokisApiClient:
@@ -31,7 +37,10 @@ class LokisApiClient:
     """
     
     def __init__(self, api_key: str, base_url: str = "https://lokisapi.online/v1", 
-                 model_cache_duration: float = 3600):
+                 model_cache_duration: float = 3600,
+                 timeout_seconds: int = 30,
+                 retries: int = 0,
+                 backoff_factor: float = 0.0):
         """
         Initialize the LokisApi client.
         
@@ -42,6 +51,9 @@ class LokisApiClient:
         """
         self.api_key = api_key
         self.base_url = base_url.rstrip('/')
+        self._timeout = timeout_seconds
+        self._retries = retries
+        self._backoff_factor = backoff_factor
         self.session = requests.Session()
         self.session.headers.update({
             'Authorization': f'Bearer {api_key}',
@@ -49,6 +61,18 @@ class LokisApiClient:
             'Accept': 'application/json',
             'User-Agent': 'lokisapi-python/1.0.0'
         })
+        if Retry and self._retries and self._retries > 0:
+            retry_config = Retry(
+                total=self._retries,
+                backoff_factor=self._backoff_factor,
+                status_forcelist=[429, 500, 502, 503, 504],
+                allowed_methods=frozenset({'GET', 'POST'}),
+                raise_on_status=False,
+                respect_retry_after_header=True,
+            )
+            adapter = HTTPAdapter(max_retries=retry_config)
+            self.session.mount('https://', adapter)
+            self.session.mount('http://', adapter)
         
         # Initialize model manager for automatic model discovery
         self.model_manager = ModelManager(self, cache_duration=model_cache_duration)
@@ -81,10 +105,17 @@ class LokisApiClient:
         url = urljoin(self.base_url + '/', endpoint)
         
         try:
+            request_headers = None
+            if stream:
+                request_headers = {
+                    'Accept': 'text/event-stream',
+                    'Cache-Control': 'no-cache',
+                    'Connection': 'keep-alive',
+                }
             if method.upper() == 'GET':
-                response = self.session.get(url, stream=stream, timeout=30)
+                response = self.session.get(url, stream=stream, timeout=self._timeout, headers=request_headers)
             elif method.upper() == 'POST':
-                response = self.session.post(url, json=data, stream=stream, timeout=30)
+                response = self.session.post(url, json=data, stream=stream, timeout=self._timeout, headers=request_headers)
             else:
                 raise ValueError(f"Unsupported HTTP method: {method}")
             
@@ -149,11 +180,27 @@ class LokisApiClient:
             return response
             
         except requests.exceptions.Timeout as e:
-            raise NetworkError(f"Request timeout: {str(e)}", timeout=30)
+            raise NetworkError(f"Request timeout: {str(e)}", timeout=self._timeout)
         except requests.exceptions.ConnectionError as e:
             raise NetworkError(f"Connection error: {str(e)}")
         except requests.exceptions.RequestException as e:
             raise NetworkError(f"Network request failed: {str(e)}")
+
+    @classmethod
+    def from_settings(cls, settings: Settings, model_cache_duration: float = 3600) -> 'LokisApiClient':
+        return cls(
+            api_key=settings.api_key,
+            base_url=settings.base_url,
+            model_cache_duration=model_cache_duration,
+            timeout_seconds=settings.timeout_seconds,
+            retries=settings.retries,
+            backoff_factor=settings.backoff_factor,
+        )
+
+    @classmethod
+    def from_env(cls, prefix: str = "LOKISAPI_", model_cache_duration: float = 3600) -> 'LokisApiClient':
+        settings = Settings.from_env(prefix)
+        return cls.from_settings(settings, model_cache_duration=model_cache_duration)
     
     def _extract_error_details(self, response: requests.Response) -> Dict[str, Any]:
         """Extract error details from response."""
@@ -183,11 +230,12 @@ class LokisApiClient:
     def _extract_retry_after(self, response: requests.Response) -> Optional[int]:
         """Extract retry-after header from response."""
         retry_after = response.headers.get('Retry-After')
-        if retry_after:
+        if retry_after is not None:
             try:
-                return int(retry_after)
-            except ValueError:
-                pass
+                # Support both numeric seconds and datetime formats; fall back to None
+                return int(str(retry_after))
+            except Exception:
+                return None
         return None
     
     def _extract_limit_type(self, response: requests.Response) -> Optional[str]:
@@ -319,6 +367,34 @@ class LokisApiClient:
                         yield ChatCompletionChunk.from_dict(chunk_data)
                     except json.JSONDecodeError:
                         continue
+
+    def chat_stream_text(
+        self,
+        request: ChatCompletionRequest
+    ) -> Iterator[str]:
+        """Yield only text content from streaming chat completion."""
+        if not request.stream:
+            request.stream = True
+        response = self._make_request('POST', 'chat/completions', request.to_dict(), stream=True)
+        for line in response.iter_lines():
+            if not line:
+                continue
+            line = line.decode('utf-8')
+            if not line.startswith('data: '):
+                continue
+            data = line[6:]
+            if data.strip() == '[DONE]':
+                break
+            try:
+                chunk_data = json.loads(data)
+                choices = chunk_data.get('choices', [])
+                if choices:
+                    delta = choices[0].get('delta', {})
+                    text = delta.get('content')
+                    if text:
+                        yield text
+            except json.JSONDecodeError:
+                continue
     
     def list_models(self, force_refresh: bool = False) -> List[Model]:
         """

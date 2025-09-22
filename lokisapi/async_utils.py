@@ -126,17 +126,16 @@ def get_supported_models(category: str = "all") -> list:
     from .models_config import ALL_MODELS
     
     if category == "all":
-        return [model["id"] for model in ALL_MODELS]
-    elif category == "text":
+        return [model["id"] for model in ALL_MODELS if not model.get("deprecated", False)]
+    if category == "text":
         return [model["id"] for model in ALL_MODELS if model.get("supports_text", False)]
-    elif category == "image":
+    if category == "image":
         return [model["id"] for model in ALL_MODELS if model.get("supports_images", False)]
-    elif category == "thinking":
+    if category == "thinking":
         return [model["id"] for model in ALL_MODELS if model.get("supports_thinking", False)]
-    elif category == "deprecated":
+    if category == "deprecated":
         return [model["id"] for model in ALL_MODELS if model.get("deprecated", False)]
-    else:
-        return []
+    return []
 
 
 def get_model_limits(model_id: str) -> dict:

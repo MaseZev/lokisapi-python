@@ -245,10 +245,17 @@ def get_supported_models(category: Optional[str] = None) -> list:
     """
     from .models_config import ALL_MODELS
     
-    if category:
-        return [model["id"] for model in ALL_MODELS if model["category"] == category]
-    else:
+    if not category:
         return [model["id"] for model in ALL_MODELS if not model.get("deprecated", False)]
+    if category == "text":
+        return [model["id"] for model in ALL_MODELS if model.get("supports_text", False)]
+    if category == "image":
+        return [model["id"] for model in ALL_MODELS if model.get("supports_images", False)]
+    if category == "thinking":
+        return [model["id"] for model in ALL_MODELS if model.get("supports_thinking", False)]
+    if category == "deprecated":
+        return [model["id"] for model in ALL_MODELS if model.get("deprecated", False)]
+    return []
 
 
 def validate_api_key_format(api_key: str) -> bool:
