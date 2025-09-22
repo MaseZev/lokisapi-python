@@ -5,8 +5,7 @@ A comprehensive Python library for interacting with LokisApi services.
 Supports image generation, image editing, chat completions, and model management.
 """
 
-from .client import LokisApiClient
-from .async_client import AsyncLokisApiClient
+from .clients import LokisApiClient, AsyncLokisApiClient
 from .models import (
     ChatMessage, ChatRole, ImageGenerationRequest, ImageEditRequest, 
     ChatCompletionRequest, Model, ImageGenerationResponse, ImageEditResponse,
@@ -38,6 +37,7 @@ from .models_config import (
     ALL_MODELS, GEMINI_MODELS, OPENAI_MODELS, THINKING_MODELS,
     IMAGE_MODELS, TEXT_MODELS, OPENAI_MODEL_MAPPING
 )
+from .config import Settings
 
 __version__ = "1.0.0"
 __author__ = "LokisApi Team"
@@ -73,5 +73,8 @@ __all__ = [
     
     # Model configurations
     "ALL_MODELS", "GEMINI_MODELS", "OPENAI_MODELS", "THINKING_MODELS",
-    "IMAGE_MODELS", "TEXT_MODELS", "OPENAI_MODEL_MAPPING"
+    "IMAGE_MODELS", "TEXT_MODELS", "OPENAI_MODEL_MAPPING",
+    
+    # Config
+    "Settings",
 ]
