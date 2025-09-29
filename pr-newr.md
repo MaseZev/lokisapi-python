@@ -493,7 +493,7 @@ for prompt, result in zip(prompts, results):
 
 ---
 
-**Tested by:** Rozy AI Assistant  
+**Tested by:** Rozy 
 **Date:** 2025-09-29  
 **Environment:** Python 3.10.13  
 **Platform:** Linux x86_64
