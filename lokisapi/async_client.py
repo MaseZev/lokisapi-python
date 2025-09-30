@@ -15,15 +15,18 @@ from .exceptions import (
     QuotaExceededError, TokenLimitError, RequestLimitError, ServiceUnavailableError
 )
 from .async_model_cache import AsyncModelManager
+from .config import Settings
 
 
 class AsyncLokisApiClient:
     
     def __init__(self, api_key: str, base_url: str = "https://lokisapi.online/v1", 
-                 model_cache_duration: float = 3600):
+                 model_cache_duration: float = 3600,
+                 timeout_seconds: int = 30):
         self.api_key = api_key
         self.base_url = base_url.rstrip('/')
         self.model_cache_duration = model_cache_duration
+        self._timeout_seconds = timeout_seconds
         self._session: Optional[aiohttp.ClientSession] = None
         self._model_manager: Optional[AsyncModelManager] = None
     
@@ -40,7 +43,7 @@ class AsyncLokisApiClient:
                 'Authorization': f'Bearer {self.api_key}',
                 'Content-Type': 'application/json'
             }
-            timeout = aiohttp.ClientTimeout(total=30)
+            timeout = aiohttp.ClientTimeout(total=self._timeout_seconds)
             self._session = aiohttp.ClientSession(headers=headers, timeout=timeout)
             
             if self._model_manager is None:
@@ -61,10 +64,17 @@ class AsyncLokisApiClient:
         url = urljoin(self.base_url + '/', endpoint)
         
         try:
+            request_headers = None
+            if stream:
+                request_headers = {
+                    'Accept': 'text/event-stream',
+                    'Cache-Control': 'no-cache',
+                    'Connection': 'keep-alive',
+                }
             if method.upper() == 'GET':
-                response = await self._session.get(url)
+                response = await self._session.get(url, headers=request_headers)
             elif method.upper() == 'POST':
-                response = await self._session.post(url, json=data)
+                response = await self._session.post(url, json=data, headers=request_headers)
             else:
                 raise ValueError(f"Unsupported HTTP method: {method}")
             
@@ -128,11 +138,25 @@ class AsyncLokisApiClient:
             return response
             
         except aiohttp.ClientTimeout:
-            raise NetworkError("Request timeout", timeout=30)
+            raise NetworkError("Request timeout", timeout=self._timeout_seconds)
         except aiohttp.ClientConnectionError as e:
             raise NetworkError(f"Connection error: {str(e)}")
         except aiohttp.ClientError as e:
             raise NetworkError(f"Network request failed: {str(e)}")
+
+    @classmethod
+    def from_settings(cls, settings: Settings, model_cache_duration: float = 3600) -> 'AsyncLokisApiClient':
+        return cls(
+            api_key=settings.api_key,
+            base_url=settings.base_url,
+            model_cache_duration=model_cache_duration,
+            timeout_seconds=settings.timeout_seconds,
+        )
+
+    @classmethod
+    def from_env(cls, prefix: str = "LOKISAPI_", model_cache_duration: float = 3600) -> 'AsyncLokisApiClient':
+        settings = Settings.from_env(prefix)
+        return cls.from_settings(settings, model_cache_duration=model_cache_duration)
     
     async def _extract_error_details(self, response: aiohttp.ClientResponse) -> Dict[str, Any]:
         try:
@@ -226,6 +250,34 @@ class AsyncLokisApiClient:
                         yield ChatCompletionChunk.from_dict(chunk_data)
                     except json.JSONDecodeError:
                         continue
+
+    async def chat_stream_text(
+        self,
+        request: ChatCompletionRequest
+    ) -> AsyncIterator[str]:
+        """Yield only text content from streaming chat completion."""
+        if not request.stream:
+            request.stream = True
+        response = await self._make_request('POST', 'chat/completions', request.to_dict(), stream=True)
+        async for line in response.content:
+            if not line:
+                continue
+            line = line.decode('utf-8')
+            if not line.startswith('data: '):
+                continue
+            data = line[6:]
+            if data.strip() == '[DONE]':
+                break
+            try:
+                chunk_data = json.loads(data)
+                choices = chunk_data.get('choices', [])
+                if choices:
+                    delta = choices[0].get('delta', {})
+                    text = delta.get('content')
+                    if text:
+                        yield text
+            except json.JSONDecodeError:
+                continue
     
     async def list_models(self, force_refresh: bool = False) -> List[Model]:
         return await self._model_manager.get_models(force_refresh)

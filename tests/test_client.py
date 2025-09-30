@@ -7,7 +7,8 @@ from unittest.mock import Mock, patch
 from lokisapi import (
     LokisApiClient, ChatMessage, ChatRole, ImageGenerationRequest,
     ImageEditRequest, ImageSize, ImageQuality, ImageStyle,
-    ReasoningEffort, AuthenticationError, RateLimitError, APIError
+    ReasoningEffort, AuthenticationError, RateLimitError, APIError,
+    ChatCompletionRequest
 )
 
 
