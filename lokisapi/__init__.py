@@ -47,7 +47,20 @@ from .batch_utils import (
     batch_chat_completions_async, batch_image_generations_async
 )
 
-__version__ = "1.1.0"
+from .middleware import (
+    Middleware, LoggingMiddleware, TimingMiddleware,
+    RateLimitMiddleware, MiddlewareManager
+)
+from .streaming import (
+    StreamCallback, PrintStreamCallback, BufferStreamCallback,
+    FileStreamCallback, stream_with_callback, async_stream_with_callback
+)
+from .rate_limiter import (
+    RateLimiter, AsyncRateLimiter, TokenBucket
+)
+from .cache import ResponseCache, cached
+
+__version__ = "beta-2.4-alpha"
 __author__ = "LokisApi Team"
 
 __all__ = [
@@ -76,4 +89,10 @@ __all__ = [
     "batch_process_sync", "batch_process_async", "chunk_list",
     "batch_chat_completions", "batch_image_generations",
     "batch_chat_completions_async", "batch_image_generations_async",
+    "Middleware", "LoggingMiddleware", "TimingMiddleware",
+    "RateLimitMiddleware", "MiddlewareManager",
+    "StreamCallback", "PrintStreamCallback", "BufferStreamCallback",
+    "FileStreamCallback", "stream_with_callback", "async_stream_with_callback",
+    "RateLimiter", "AsyncRateLimiter", "TokenBucket",
+    "ResponseCache", "cached",
 ]
